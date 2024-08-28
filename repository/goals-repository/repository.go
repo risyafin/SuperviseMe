@@ -1,0 +1,76 @@
+package goalsrepository
+
+import (
+	"superviseMe/core/entity"
+	goalsRepo "superviseMe/core/repository"
+
+	"gorm.io/gorm"
+)
+
+type repository struct {
+	DB *gorm.DB
+}
+
+func NewGoalsRepository(db *gorm.DB) goalsRepo.GoalsRepository {
+	return &repository{
+		DB: db,
+	}
+}
+
+func (r repository) GetGoalsByGmail(personalGmail string) (*entity.Goals, error) {
+	var (
+		goals *entity.Goals
+		db    = r.DB
+	)
+
+	err := db.Where("personal_gmail = ?", personalGmail).First(&goals).Error
+	return goals, err
+}
+
+// func (r repository) GetGoalsByUserID(userID string) (*entity.Goals, error) {
+// 	var (
+// 		goals *entity.Goals
+// 		db    = r.DB
+// 	)
+
+// 	db = db.Preload("User")
+// 	err := db.Where("userID = ?", userID).First(&goals).Error
+// 	return goals, err
+// }
+
+// func (r repository) GetGoals() (*entity.Goals, error) {
+// 	var (
+// 		goals *entity.Goals
+// 		db    = r.DB
+// 	)
+
+// 	db = db.Preload("User")
+// 	err := db.Find(&goals).Error
+// 	return goals, err
+// }
+
+func (r repository) CreateGoals(goals *entity.Goals) (*entity.Goals, error) {
+
+	err := r.DB.Select(
+		"GoalName",
+		"Description",
+		"PersonalGmail",
+		"SupervisorGmail",
+		"BackgroundColor",
+		"Status",
+		"NilaiProgres",
+		"GoalStatus",
+		"IsActive",
+		"RequestedAt").Create(&goals).Error
+	return goals, err
+}
+
+// func (r repository) UpdateGoals(id string, goals *entity.Goals) error {
+// 	err := r.DB.Model(&entity.Goals{}).Where(id).Updates(&goals).Error
+// 	return err
+// }
+
+// func (r repository) DeleteGoals(id string, goals *entity.Goals) error {
+// 	err := r.DB.Save(&goals).Error
+// 	return err
+// }
