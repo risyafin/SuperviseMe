@@ -21,6 +21,10 @@ func (r *repository) Save(user *entity.User) error {
 	return r.DB.Save(user).Error
 }
 
+func (r *repository) UpdateName(name string, email string) error {
+	return r.DB.Model(&entity.User{}).Where("email = ?", email).Update("name", name).Error
+}
+
 func (r *repository) FindByID(id string) (*entity.User, error) {
 	var user entity.User
 	if err := r.DB.First(&user, "id = ?", id).Error; err != nil {
@@ -42,14 +46,13 @@ func (r repository) GetGoalsBySuperviseeUser(gmail string) (*entity.User, error)
 	db = db.Preload("SupervisorGoals", func(db *gorm.DB) *gorm.DB {
 		return db.Limit(2)
 	})
-	db = db.Preload("Notification")
 	db = db.Preload("ActivityLog")
 
-	err := db.Where("gmail =?", gmail).First(&goals).Error
+	err := db.Where("email =?", gmail).First(&goals).Error
 	return goals, err
 }
 
-func (r repository) GetGoalSupervisor(gmail string) (*entity.User, error) {
+func (r repository) GetGoalSupervisor(email string) (*entity.User, error) {
 	var (
 		goals *entity.User
 		db    = r.DB
@@ -58,11 +61,11 @@ func (r repository) GetGoalSupervisor(gmail string) (*entity.User, error) {
 		return db.Limit(3)
 	})
 
-	err := db.Where("gmail =?", gmail).First(&goals).Error
+	err := db.Where("email =?", email).First(&goals).Error
 	return goals, err
 }
 
-func (r repository) GetGoalPersonal(gmail string) (*entity.User, error) {
+func (r repository) GetGoalPersonal(email string) (*entity.User, error) {
 	var (
 		goals *entity.User
 		db    = r.DB
@@ -71,23 +74,23 @@ func (r repository) GetGoalPersonal(gmail string) (*entity.User, error) {
 		return db.Limit(3)
 	})
 
-	err := db.Where("gmail =?", gmail).First(&goals).Error
+	err := db.Where("email =?", email).First(&goals).Error
 	return goals, err
 }
 
-func (r repository) GetUserByGmail(gmail string) (*entity.User, error) {
+func (r repository) GetUserByGmail(email string) (*entity.User, error) {
 	var user *entity.User
-	result := r.DB.Where("gmail =? ", gmail).First(&user)
+	result := r.DB.Where("email =? ", email).First(&user)
 	return user, result.Error
 }
 
 func (r repository) Registration(user *entity.User) error {
-	result := r.DB.Select("Name", "Gmail", "Password").Create(&user)
+	result := r.DB.Select("Name", "Email", "Password").Create(&user)
 	return result.Error
 }
 
-func (r repository) Login(gmail string, password string) (*entity.User, error) {
+func (r repository) Login(email string, password string) (*entity.User, error) {
 	var user entity.User
-	result := r.DB.Model(&user).Where("gmail =? AND password =?  ", gmail, password).First(&user)
+	result := r.DB.Model(&user).Where("email =? AND password =?  ", email, password).First(&user)
 	return &user, result.Error
 }

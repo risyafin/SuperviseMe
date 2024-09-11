@@ -17,6 +17,10 @@ func NewGoalsRepository(db *gorm.DB) goalsRepo.GoalsRepository {
 	}
 }
 
+func (r *repository) RequestSupervisor(goal *entity.Goals) error {
+	return r.DB.Save(goal).Error
+}
+
 func (r repository) GetGoalsByGmail(personalGmail string) (*entity.Goals, error) {
 	var (
 		goals *entity.Goals

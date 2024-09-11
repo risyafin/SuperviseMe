@@ -16,11 +16,11 @@ func NewCardHandler(cardUsecase module.CardUsecase) *cardHandler {
 	return &cardHandler{cardUsecase: cardUsecase}
 }
 
-func (e *cardHandler) CreateGoals(writer http.ResponseWriter, request *http.Request) {
+func (e *cardHandler) CreateCard(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
 	card := &entity.Card{}
-	userGmail := request.Context().Value("gmail").(string)
+	userGmail := request.Context().Value("email").(string)
 	fmt.Println("ini dia:", userGmail)
 
 	card.GmailPersonal = userGmail
@@ -74,15 +74,15 @@ func (e *cardHandler) CreateGoals(writer http.ResponseWriter, request *http.Requ
 // reques body
 // {
 // 	"NameCard": "My First Card",
-// 	"checklists": [
-// 	  {
-// 		"name": "Checklist 1"
-// 	  },
-// 	  {
-// 		"name": "Checklist 2"
-// 	  },
-// 	  {
-// 		"name": "Checklist 3"
-// 	  }
-// 	]
+// "checklists": [
+//   {
+// 	"name": "Checklist 1"
+//   },
+//   {
+// 	"name": "Checklist 2"
+//   },
+//   {
+// 	"name": "Checklist 3"
+//   }
+// ]
 //   }

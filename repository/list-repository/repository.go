@@ -17,13 +17,13 @@ func NewListRepository(db *gorm.DB) listRepo.ListRepository {
 	}
 }
 
-func (r repository) GetList(gmailPersonal string) (*entity.List, error) {
+func (r repository) GetList(goalId string) (*entity.List, error) {
 	var (
 		list *entity.List
 		db   = r.DB
 	)
 
 	db = db.Preload("Card")
-	err := db.Where("goal_personal_gmail = ?", gmailPersonal).First(&list).Error
+	err := db.Where("goal_id = ?", goalId).First(&list).Error
 	return list, err
 }

@@ -14,6 +14,7 @@ import (
 	"superviseMe/core/module"
 	"superviseMe/domain"
 
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 )
@@ -119,6 +120,25 @@ func (e *userHandler) CallbackGoogle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		claims := entity.MyClaims{
+			Email:          user.Email,
+			Id:             user.ID,
+			StandardClaims: jwt.StandardClaims{},
+		}
+		tokenjwt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		signedToken, _ := tokenjwt.SignedString([]byte("Bolong"))
+
+		respon := entity.ResponSucces{Message: "Succes", Token: signedToken, Data: user}
+		result, err := json.Marshal(respon)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errResponse := entity.ResponsesError{Error: err.Error()}
+			_ = json.NewEncoder(w).Encode(errResponse)
+			return
+		}
+
+		fmt.Println("token :", tokenjwt)
+		w.Write(result)
 		fmt.Fprintf(w, "User Info: %+v\n", user)
 	}
 }
@@ -137,6 +157,29 @@ func (e *userHandler) Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("succes"))
+}
+
+func (e *userHandler) UpdateName(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	userGmail := r.Context().Value("email").(string)
+	fmt.Println("ini", userGmail)
+	var user *entity.User
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		errResponse := entity.ResponsesError{Error: err.Error()}
+		_ = json.NewEncoder(w).Encode(errResponse)
+		return
+	}
+	err = e.userUseCase.UpdateName(userGmail, user.Name)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Write([]byte("succes"))
+
 }
 
 func (e *userHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +224,7 @@ func (e *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (e *userHandler) GetGoalSupervisor(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
-	userGmail := request.Context().Value("gmail").(string)
+	userGmail := request.Context().Value("email").(string)
 	user, err := e.userUseCase.GetGoalsBySuperviseeUser(userGmail)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -193,7 +236,7 @@ func (e *userHandler) GetGoalSupervisor(writer http.ResponseWriter, request *htt
 	for _, s := range user.SupervisorGoals {
 		supervisorGoalRespon = append(supervisorGoalRespon, entity.GoalSupervisorRespons{
 			GoalName:        s.GoalName,
-			SupervisorGmail: *s.SupervisorGmail,
+			SupervisorGmail: s.SupervisorGmail,
 			CreatedAt:       s.CreatedAt,
 			NilaiProgres:    s.NilaiProgres,
 			GoalStatus:      s.GoalStatus,
@@ -221,7 +264,7 @@ func (e *userHandler) GetGoalSupervisor(writer http.ResponseWriter, request *htt
 func (e *userHandler) GetGoalPersonal(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
-	userGmail := request.Context().Value("gmail").(string)
+	userGmail := request.Context().Value("email").(string)
 	user, err := e.userUseCase.GetGoalsBySuperviseeUser(userGmail)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -261,7 +304,7 @@ func (e *userHandler) GetGoalPersonal(writer http.ResponseWriter, request *http.
 func (e *userHandler) GetGoalsBySuperviseeUser(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
-	userGmail := request.Context().Value("gmail").(string)
+	userGmail := request.Context().Value("email").(string)
 	user, err := e.userUseCase.GetGoalsBySuperviseeUser(userGmail)
 
 	if err != nil {
@@ -276,9 +319,10 @@ func (e *userHandler) GetGoalsBySuperviseeUser(writer http.ResponseWriter, reque
 			GoalName:        i.GoalName,
 			Description:     i.Description,
 			PersonalGmail:   i.PersonalGmail,
-			SupervisorGmail: *i.SupervisorGmail,
+			SupervisorGmail: i.SupervisorGmail,
 			CreatedAt:       i.CreatedAt,
 			NilaiProgres:    i.NilaiProgres,
+			GoalStatus:      i.GoalStatus,
 		})
 	}
 
@@ -289,9 +333,10 @@ func (e *userHandler) GetGoalsBySuperviseeUser(writer http.ResponseWriter, reque
 			GoalName:        s.GoalName,
 			Description:     s.Description,
 			PersonalGmail:   s.PersonalGmail,
-			SupervisorGmail: *s.SupervisorGmail,
+			SupervisorGmail: s.SupervisorGmail,
 			CreatedAt:       s.CreatedAt,
 			NilaiProgres:    s.NilaiProgres,
+			GoalStatus:      s.GoalStatus,
 		})
 	}
 

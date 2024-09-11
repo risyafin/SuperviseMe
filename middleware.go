@@ -28,7 +28,7 @@ func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		contextClaims := request.Context()
 		// contextClaimsUser := context.Background()
 
-		contextClaims = context.WithValue(contextClaims, "gmail", claims.Email)
+		contextClaims = context.WithValue(contextClaims, "email", claims.Email)
 		contextClaims = context.WithValue(contextClaims, "userID", claims.Id)
 		request = request.WithContext(contextClaims)
 		next(writer, request)

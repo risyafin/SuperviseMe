@@ -18,19 +18,38 @@ func NewCardRepository(db *gorm.DB) cardRepo.CardRepository {
 }
 
 func (r *repository) CreateCard(card *entity.Card) (*entity.Card, error) {
-	err := r.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(card).Error; err != nil {
-			return err
-		}
+	// Mulai transaksi
+	tx := r.DB.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 
-		for _, checklist := range card.CheckListCard {
-			checklist.CardID = card.ID
-			if err := tx.Create(&checklist).Error; err != nil {
-				return err
-			}
-		}
+	// Simpan card
+	err := tx.Create(&card).Error
+	if err != nil {
+		tx.Rollback() // rollback jika terjadi error
+		return nil, err
+	}
 
-		return nil
-	})
-	return card, err
+	// Simpan checklist jika ada
+	for _, checklist := range card.CheckListCard {
+		checklist.CardID = card.ID // Set ID card pada checklist
+		checkListCard := entity.CheckListCard{
+			CardID: card.ID, // Set CardID sesuai dengan ID card yang baru saja dibuat
+			Name:   "Checklist 1",
+			IsDone: "0",
+		}
+		err := tx.Create(&checkListCard).Error
+		if err != nil {
+			tx.Rollback() // rollback jika terjadi error
+			return nil, err
+		}
+	}
+
+	// Commit transaksi jika semuanya berhasil
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return card, nil
 }

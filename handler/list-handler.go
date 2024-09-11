@@ -17,7 +17,7 @@ func NewListHandler(listUseCase module.ListUsecase) *listHandler {
 func (e *listHandler) GetList(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
-	userGmail, ok := request.Context().Value("gmail").(string)
+	userGmail, ok := request.Context().Value("email").(string)
 	if !ok {
 		writer.WriteHeader(http.StatusBadRequest)
 		errResponse := entity.ResponsesError{Error: "Invalid gmail in context"}

@@ -3,8 +3,10 @@ package module
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"superviseMe/core/entity"
 	"superviseMe/core/repository"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -12,13 +14,14 @@ import (
 )
 
 type UserUseCase interface {
-	GetGoalsBySuperviseeUser(gmail string) (*entity.User, error)
-	GetGoalSupervisor(gmail string) (*entity.User, error)
-	GetGoalPersonal(gmail string) (*entity.User, error)
-	Login(gmail string, password string) (string, *entity.User, error)
+	GetGoalsBySuperviseeUser(email string) (*entity.User, error)
+	GetGoalSupervisor(email string) (*entity.User, error)
+	GetGoalPersonal(email string) (*entity.User, error)
+	Login(email string, password string) (string, *entity.User, error)
 	SaveUser(user *entity.User) error
 	GetUserByID(id string) (*entity.User, error)
 	Registration(user *entity.User) error
+	UpdateName(name string, email string) error
 }
 
 type userUseCase struct {
@@ -29,16 +32,20 @@ func NewUserUseCase(userRepository repository.UserResitory) UserUseCase {
 	return &userUseCase{userRepository: userRepository}
 }
 
-func (e *userUseCase) GetGoalsBySuperviseeUser(gmail string) (*entity.User, error) {
-	return e.userRepository.GetGoalsBySuperviseeUser(gmail)
+func (e *userUseCase) GetGoalsBySuperviseeUser(email string) (*entity.User, error) {
+	return e.userRepository.GetGoalsBySuperviseeUser(email)
 }
 
-func (e *userUseCase) GetGoalSupervisor(gmail string) (*entity.User, error) {
-	return e.userRepository.GetGoalSupervisor(gmail)
+func (e *userUseCase) GetGoalSupervisor(email string) (*entity.User, error) {
+	return e.userRepository.GetGoalSupervisor(email)
 }
 
-func (e *userUseCase) GetGoalPersonal(gmail string) (*entity.User, error) {
-	return e.userRepository.GetGoalSupervisor(gmail)
+func (e *userUseCase) GetGoalPersonal(email string) (*entity.User, error) {
+	return e.userRepository.GetGoalSupervisor(email)
+}
+
+func (u *userUseCase) UpdateName(name string, email string) error {
+	return u.userRepository.UpdateName(name, email)
 }
 
 func (u *userUseCase) SaveUser(user *entity.User) error {
@@ -60,6 +67,17 @@ func validatePassword(password string) error {
 	return nil
 }
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func SeededRandString(length int) string {
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
 func (e *userUseCase) Registration(user *entity.User) error {
 	err := validatePassword(user.Password)
 	if err != nil {
@@ -68,13 +86,14 @@ func (e *userUseCase) Registration(user *entity.User) error {
 	} else {
 		hash, _ := HashPassword(user.Password)
 		user.Password = hash
+		user.Name = SeededRandString(10)
 		errs := e.userRepository.Registration(user)
 		return errs
 	}
 }
-func (e *userUseCase) Login(gmail string, password string) (string, *entity.User, error) {
-	fmt.Println("ini di usecase", gmail)
-	user, err := e.userRepository.GetUserByGmail(gmail)
+func (e *userUseCase) Login(email string, password string) (string, *entity.User, error) {
+	fmt.Println("ini di usecase", email)
+	user, err := e.userRepository.GetUserByGmail(email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return "", user, errors.New("invalid idential")

@@ -18,10 +18,17 @@ type Card struct {
 	Content       string          `json:"content"`
 	Status        string          `gorm:"type:enum('progres', 'completed')" json:"status"`
 	NilaiProgres  int             `json:"nilaiProgres"`
-	StartDate     time.Time       `json:"startDate"`
+	StartDate     time.Time       `json:"startDate"` // 2024-09-28T00:00:00Z
 	EndDate       time.Time       `json:"endDate"`
 	CheckListCard []CheckListCard `json:"checkListCard"`
 	Comment       []Comment       `json:"comment"`
+}
+type CheckListCard struct {
+	gorm.Model
+	ID     int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	CardID int    `json:"cardId"`
+	Name   string `json:"name"`
+	IsDone string `gorm:"type:enum('1', '0');default:'0'" json:"isDone"`
 }
 
 type CardResponHome struct {
@@ -54,15 +61,8 @@ type CardRespons struct {
 	ListID    int       `json:"listId"`
 }
 
-type CheckListCard struct {
-	gorm.Model
-	ID     int    `json:"id"`
-	CardID int    `json:"cardId"`
-	Name   string `json:"name"`
-	IsDone string `gorm:"type:enum('1', '0')" json:"isDone"`
-}
 type CheckListCardResponse struct {
-	ID     int    `json:"id"`
+	ID     int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	CardID int    `json:"cardId"`
 	Name   string `json:"name"`
 	IsDone string `gorm:"type:enum('1', '0')" json:"isDone"`
