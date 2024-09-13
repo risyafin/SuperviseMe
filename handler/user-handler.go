@@ -159,21 +159,27 @@ func (e *userHandler) Registration(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("succes"))
 }
 
-func (e *userHandler) UpdateName(w http.ResponseWriter, r *http.Request) {
+func (e *userHandler) UpdateName(w http.ResponseWriter, request *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
-	userGmail := r.Context().Value("email").(string)
+	userGmail, ok := request.Context().Value("email").(string)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		errResponse := entity.ResponsesError{"email not found in context or not a string"}
+		_ = json.NewEncoder(w).Encode(errResponse)
+		return
+	}
 	fmt.Println("ini", userGmail)
 	var user *entity.User
-
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		errResponse := entity.ResponsesError{Error: err.Error()}
 		_ = json.NewEncoder(w).Encode(errResponse)
 		return
 	}
-	err = e.userUseCase.UpdateName(userGmail, user.Name)
+	fmt.Println("ini name:",user.Name)
+	err = e.userUseCase.UpdateName(user.Name, userGmail)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return

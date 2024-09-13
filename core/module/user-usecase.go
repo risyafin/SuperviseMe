@@ -45,6 +45,7 @@ func (e *userUseCase) GetGoalPersonal(email string) (*entity.User, error) {
 }
 
 func (u *userUseCase) UpdateName(name string, email string) error {
+	fmt.Println("usecase", email, "&", name)
 	return u.userRepository.UpdateName(name, email)
 }
 

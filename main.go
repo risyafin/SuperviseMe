@@ -68,7 +68,7 @@ func main() {
 	r.HandleFunc("/auth/google-callback", UserHandler.CallbackGoogle)
 	r.HandleFunc("/registration", UserHandler.Registration).Methods("POST")
 	r.HandleFunc("/login", UserHandler.Login).Methods("POST")
-	r.HandleFunc("/update-name", UserHandler.UpdateName).Methods("PUT")
+	r.HandleFunc("/update-name", jwtMiddleware(UserHandler.UpdateName)).Methods("PUT")
 
 	r.HandleFunc("/home", jwtMiddleware(UserHandler.GetGoalsBySuperviseeUser)).Methods("GET")
 	r.HandleFunc("/supervisor", jwtMiddleware(UserHandler.GetGoalSupervisor)).Methods("GET")
