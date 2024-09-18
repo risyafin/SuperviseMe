@@ -20,7 +20,6 @@ func NewUserRepository(db *gorm.DB) userRepo.UserResitory {
 func (r *repository) Save(user *entity.User) error {
 	return r.DB.Save(user).Error
 }
-
 func (r *repository) UpdateName(name string, email string) error {
 	return r.DB.Model(&entity.User{}).Where("email = ?", email).Update("name", name).Error
 }

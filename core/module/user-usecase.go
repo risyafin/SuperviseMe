@@ -22,6 +22,7 @@ type UserUseCase interface {
 	GetUserByID(id string) (*entity.User, error)
 	Registration(user *entity.User) error
 	UpdateName(name string, email string) error
+	GetUserByGmail(email string) (*entity.User, error)
 }
 
 type userUseCase struct {
@@ -30,6 +31,10 @@ type userUseCase struct {
 
 func NewUserUseCase(userRepository repository.UserResitory) UserUseCase {
 	return &userUseCase{userRepository: userRepository}
+}
+
+func (e *userUseCase) GetUserByGmail(email string) (*entity.User, error) {
+	return e.userRepository.GetUserByGmail(email)
 }
 
 func (e *userUseCase) GetGoalsBySuperviseeUser(email string) (*entity.User, error) {

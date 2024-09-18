@@ -3,6 +3,7 @@ package goalsrepository
 import (
 	"superviseMe/core/entity"
 	goalsRepo "superviseMe/core/repository"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -17,8 +18,20 @@ func NewGoalsRepository(db *gorm.DB) goalsRepo.GoalsRepository {
 	}
 }
 
-func (r *repository) RequestSupervisor(goal *entity.Goals) error {
-	return r.DB.Save(goal).Error
+func (r repository) AcceptedSupervisor(supervisor string, status string, accepted time.Time) error {
+	updates := map[string]interface{}{
+		"status":      status,
+		"accepted_at": accepted,
+	}
+
+	// Update 2 field dari entitas Goals berdasarkan kondisi
+	return r.DB.Model(&entity.Goals{}).
+		Where("supervisor_gmail = ?", supervisor).
+		Updates(updates).Error
+}
+
+func (r *repository) UpdateName(name string, email string) error {
+	return r.DB.Model(&entity.User{}).Where("email = ?", email).Update("name", name).Error
 }
 
 func (r repository) GetGoalsByGmail(personalGmail string) (*entity.Goals, error) {

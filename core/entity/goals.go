@@ -8,22 +8,23 @@ import (
 
 type Goals struct {
 	gorm.Model
-	ID              int     `json:"id"`
-	GoalName        string  `json:"goalName"`
-	Description     string  `json:"description"`
-	BackgroundColor string  `json:"backgroundColor"`
-	PersonalGmail   string  `gorm:"type:varchar(100);index" json:"personal"`
-	SupervisorGmail string  `gorm:"type:varchar(100);index" json:"supervisor"`
-	Status          string  `gorm:"type:enum('requested', 'accepted', 'rejected' )" json:"status"`
-	NilaiProgres    float64 `json:"nilaiProgres"`
-	GoalStatus      string  `gorm:"type:enum('progres', 'completed')" json:"goalStatus"`
-	// AcceptedAt       time.Time      `json:"acceptAt"`
-	// RejectedAt       time.Time      `json:"rejectedAt"`
-	Requested              time.Time      `json:"requestAt"`
+	ID                     int            `json:"id"`
+	GoalName               string         `json:"goalName"`
+	Description            string         `json:"description"`
+	BackgroundColor        string         `json:"backgroundColor"`
+	PersonalGmail          string         `gorm:"type:varchar(100);index" json:"personal"`
+	SupervisorGmail        string         `gorm:"type:varchar(100);index" json:"supervisor"`
+	Status                 string         `gorm:"type:enum('requested', 'accepted', 'rejected' )" json:"status"`
+	NilaiProgres           float64        `json:"nilaiProgres"`
+	GoalStatus             string         `gorm:"type:enum('progres', 'completed')" json:"goalStatus"`
+	AcceptedAt             time.Time      `json:"acceptAt"`
+	RejectedAt             time.Time      `json:"rejectedAt"`
+	RequestedAt            time.Time      `json:"requestAt"`
 	IsActive               string         `gorm:"type:enum('1', '0')" json:"isActive"`
 	List                   []List         `gorm:"foreignKey:GoalID;references:ID" json:"List"`
 	PersonalGoalCard       []Card         `gorm:"foreignKey:GmailPersonal;references:PersonalGmail" json:"PersonalGoalCard"`
-	NotificationSupervisor []Notification `gorm:"foreignKey:Email;references:SupervisorGmail" json:"notificationPersonal"`
+	NotificationSupervisor []Notification `gorm:"foreignKey:SupervisorEmail;references:SupervisorGmail" json:"notificationSupervisor"`
+	NotificationPersonal   []Notification `gorm:"foreignKey:PersonalEmail;references:PersonalGmail" json:"notificationPersonal"`
 	Notification           []Notification `json:"notification"`
 }
 

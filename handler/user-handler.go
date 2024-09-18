@@ -178,7 +178,7 @@ func (e *userHandler) UpdateName(w http.ResponseWriter, request *http.Request) {
 		_ = json.NewEncoder(w).Encode(errResponse)
 		return
 	}
-	fmt.Println("ini name:",user.Name)
+	fmt.Println("ini name:", user.Name)
 	err = e.userUseCase.UpdateName(user.Name, userGmail)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -294,6 +294,33 @@ func (e *userHandler) GetGoalPersonal(writer http.ResponseWriter, request *http.
 		PersonalGoals: personalGoalRespon,
 	}
 
+	responses := entity.ResponsesSucces{Message: "Succes", Data: responsUser}
+	result, err := json.Marshal(responses)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		errResponse := entity.ResponsesError{Error: err.Error()}
+		_ = json.NewEncoder(writer).Encode(errResponse)
+		return
+	}
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(result)
+
+}
+
+func (e *userHandler) GetUserByGmail(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	userGmail := request.Context().Value("email").(string)
+	user, err := e.userUseCase.GetUserByGmail(userGmail)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		errResponse := entity.ResponsesError{Error: err.Error()}
+		_ = json.NewEncoder(writer).Encode(errResponse)
+	}
+	responsUser := entity.UserResponProfile{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
 	responses := entity.ResponsesSucces{Message: "Succes", Data: responsUser}
 	result, err := json.Marshal(responses)
 	if err != nil {

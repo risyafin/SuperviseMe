@@ -30,6 +30,12 @@ type User struct {
 	ActivityLog     []ActivityLog `json:"activityLog"`
 }
 
+type UserResponProfile struct {
+	ID int `json:"id"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+}
+
 type UserResponseHome struct {
 	ID              int                 `json:"id"`
 	Name            string              `json:"name"`

@@ -5,7 +5,8 @@ import "gorm.io/gorm"
 type Notification struct {
 	gorm.Model
 	ID               int                `json:"id"`
-	Email            string             `json:"email"`
+	PersonalEmail    string             `json:"personal"`
+	SupervisorEmail  string             `json:"supervisor"`
 	GoalsID          int                `json:"goalsId"`
 	Message          string             `json:"message"`
 	Status           string             `gorm:"type:enum('unread', 'read')" json:"status"`
@@ -19,7 +20,8 @@ type TypeNotification struct {
 }
 type NotificationRespon struct {
 	ID               int                      `json:"id"`
-	Email            string                   `json:"email"`
+	PersonalEmail    string                   `json:"personal"`
+	SupervisorEmail  string                   `json:"supervisor"`
 	GoalsID          int                      `json:"goalsId"`
 	Message          string                   `json:"message"`
 	Status           string                   `gorm:"type:enum('unread', 'read')" json:"status"`

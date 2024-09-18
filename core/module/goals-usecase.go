@@ -11,9 +11,9 @@ import (
 type GoalsUseCase interface {
 	CreateGoals(goals *entity.Goals) (*entity.Goals, error)
 	GetGoalsByGmail(personalGmail string) (*entity.Goals, error)
-	RequestSupervisor(personalEmail string, supervisorEmail string) error
-	AcceptSupervisorRequest(gmail string, supervisorEmail string) error
-	RejectSupervisorRequest(gmail string, supervisorEmail string) error
+	// RequestSupervisor(personalEmail string, supervisorEmail string) error
+	AcceptSupervisorRequest(email string) error
+	// RejectSupervisorRequest(gmail string, supervisorEmail string) error
 	// GetGoalsByUserID(userID string) (*entity.Goals, error)
 	// GetGoals() (*entity.Goals, error)
 	// UpdateGoals(id string, goals *entity.Goals) error
@@ -40,69 +40,70 @@ func NewGoalsUseCase(goalsRepository repository.GoalsRepository, notificationRep
 //		return e.goalsRepository.GetGoalsByUserID(userID)
 //	}
 
-func (uc *goalsUseCase) RequestSupervisor(personalEmail string, supervisorEmail string) error {
-	goal, err := uc.goalsRepository.GetGoalsByGmail(personalEmail)
+// func (uc *goalsUseCase) RequestSupervisor(personalEmail string, supervisorEmail string) error {
+// 	goal, err := uc.goalsRepository.GetGoalsByGmail(personalEmail)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	goal.SupervisorGmail = supervisorEmail
+// 	goal.Status = "requested"
+// 	// goal.RequestedAt = time.Now()
+
+// 	err = uc.goalsRepository.RequestSupervisor(goal)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Create a notification for the supervisor
+// 	message := fmt.Sprintf("You have a new request to supervise the goal: %s", goal.GoalName)
+// 	notification := &entity.Notification{
+// 		PersonalEmail:   goal.PersonalGmail, // Assuming `UserId` refers to the supervisor's user ID
+// 		SupervisorEmail: goal.SupervisorGmail,
+// 		GoalsID:         goal.ID,
+// 		Message:         message,
+// 		Status:          "unread",
+// 	}
+
+// 	err = uc.notificationRepo.CreateNotification(notification)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+func (uc *goalsUseCase) AcceptSupervisorRequest(email string) error {
+	goal, err := uc.goalsRepository.GetGoalsByGmail(email)
 	if err != nil {
 		return err
 	}
 
-	goal.SupervisorGmail = supervisorEmail
-	goal.Status = "requested"
-	// goal.RequestedAt = time.Now()
-
-	err = uc.goalsRepository.RequestSupervisor(goal)
-	if err != nil {
-		return err
-	}
-
-	// Create a notification for the supervisor
-	message := fmt.Sprintf("You have a new request to supervise the goal: %s", goal.GoalName)
-	notification := &entity.Notification{
-		Email:   goal.PersonalGmail, // Assuming `UserId` refers to the supervisor's user ID
-		GoalsID: goal.ID,
-		Message: message,
-		Status:  "unread",
-	}
-
-	err = uc.notificationRepo.CreateNotification(notification)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (uc *goalsUseCase) AcceptSupervisorRequest(gmail string, supervisorEmail string) error {
-	goal, err := uc.goalsRepository.GetGoalsByGmail(gmail)
-	if err != nil {
-		return err
-	}
-
-	if goal.SupervisorGmail != supervisorEmail || goal.Status != "requested" {
+	if goal.SupervisorGmail == goal.PersonalGmail || goal.Status != "requested" {
 		return errors.New("invalid supervisor email or request not pending")
 	}
-
 	goal.Status = "accepted"
-	// goal.AcceptedAt = time.Now()
 
-	return uc.goalsRepository.RequestSupervisor(goal)
+	goal.AcceptedAt = time.Now()
+
+	return uc.goalsRepository.AcceptedSupervisor(goal.SupervisorGmail, goal.Status, goal.AcceptedAt)
 }
 
-func (uc *goalsUseCase) RejectSupervisorRequest(gmail string, supervisorEmail string) error {
-	goal, err := uc.goalsRepository.GetGoalsByGmail(gmail)
-	if err != nil {
-		return err
-	}
+// func (uc *goalsUseCase) RejectSupervisorRequest(gmail string, supervisorEmail string) error {
+// 	goal, err := uc.goalsRepository.GetGoalsByGmail(gmail)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if goal.SupervisorGmail != supervisorEmail || goal.Status != "requested" {
-		return errors.New("invalid supervisor email or request not pending")
-	}
+// 	if goal.SupervisorGmail != supervisorEmail || goal.Status != "requested" {
+// 		return errors.New("invalid supervisor email or request not pending")
+// 	}
 
-	goal.Status = "rejected"
-	// goal.RejectedAt = time.Now()
+// 	goal.Status = "rejected"
+// 	// goal.RejectedAt = time.Now()
 
-	return uc.goalsRepository.RequestSupervisor(goal)
-}
+// 	return uc.goalsRepository.RequestSupervisor(goal)
+// }
 
 func (e *goalsUseCase) GetGoalsByGmail(personalGmail string) (*entity.Goals, error) {
 	return e.goalsRepository.GetGoalsByGmail(personalGmail)
@@ -128,7 +129,7 @@ func (e *goalsUseCase) CreateGoals(goals *entity.Goals) (*entity.Goals, error) {
 
 	goals.Status = "requested"
 	goals.NilaiProgres = 0
-	goals.Requested = time.Now()
+	goals.RequestedAt = time.Now()
 
 	// err := e.goalsRepository.RequestSupervisor(goals)
 	// if err != nil {
@@ -143,10 +144,11 @@ func (e *goalsUseCase) CreateGoals(goals *entity.Goals) (*entity.Goals, error) {
 	// Create a notification for the supervisor
 	message := fmt.Sprintf("You have a new request to supervise the goal: %s", goal.GoalName)
 	notification := &entity.Notification{
-		Email:   goal.SupervisorGmail, // Assuming `UserId` refers to the supervisor's user ID
-		GoalsID: goal.ID,
-		Message: message,
-		Status:  "unread",
+		SupervisorEmail: goal.SupervisorGmail, // Assuming `UserId` refers to the supervisor's user ID
+		PersonalEmail:   goal.PersonalGmail,
+		GoalsID:         goal.ID,
+		Message:         message,
+		Status:          "unread",
 	}
 
 	fmt.Println("ini dibawah", goal.ID)

@@ -58,35 +58,35 @@ func (e *goalsHandler) CreateGoals(writer http.ResponseWriter, request *http.Req
 	writer.Write(result)
 }
 
-func (h *goalsHandler) RequestSupervisor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	goals := &entity.Goals{}
-	userGmail := r.Context().Value("email").(string)
-	fmt.Println("ini dia:", userGmail)
+// func (h *goalsHandler) RequestSupervisor(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
+// 	goals := &entity.Goals{}
+// 	userGmail := r.Context().Value("email").(string)
+// 	fmt.Println("ini dia:", userGmail)
 
-	goals.PersonalGmail = userGmail
-	fmt.Println("ini:", goals.PersonalGmail)
+// 	goals.PersonalGmail = userGmail
+// 	fmt.Println("ini:", goals.PersonalGmail)
 
-	supervisorEmail := r.URL.Query().Get("supervisor")
-	if supervisorEmail == "" {
-		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
-		return
-	}
+// 	supervisorEmail := r.URL.Query().Get("supervisor")
+// 	if supervisorEmail == "" {
+// 		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
+// 		return
+// 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&goals); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
+// 	if err := json.NewDecoder(r.Body).Decode(&goals); err != nil {
+// 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+// 		return
+// 	}
 
-	err := h.goalsUseCase.RequestSupervisor(goals.PersonalGmail, supervisorEmail)
-	if err != nil {
-		http.Error(w, "Failed to request supervisor", http.StatusInternalServerError)
-		return
-	}
+// 	err := h.goalsUseCase.RequestSupervisor(goals.PersonalGmail, supervisorEmail)
+// 	if err != nil {
+// 		http.Error(w, "Failed to request supervisor", http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Supervisor request sent successfully"))
-}
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte("Supervisor request sent successfully"))
+// }
 
 func (h *goalsHandler) AcceptSupervisorRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -97,13 +97,7 @@ func (h *goalsHandler) AcceptSupervisorRequest(w http.ResponseWriter, r *http.Re
 	goals.PersonalGmail = userGmail
 	fmt.Println("ini:", goals.PersonalGmail)
 
-	supervisorEmail := r.URL.Query().Get("supervisorEmail")
-	if supervisorEmail == "" {
-		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
-		return
-	}
-
-	err := h.goalsUseCase.AcceptSupervisorRequest(userGmail, supervisorEmail)
+	err := h.goalsUseCase.AcceptSupervisorRequest(userGmail)
 	if err != nil {
 		http.Error(w, "Failed to accept supervisor request", http.StatusInternalServerError)
 		return
@@ -113,30 +107,30 @@ func (h *goalsHandler) AcceptSupervisorRequest(w http.ResponseWriter, r *http.Re
 	w.Write([]byte("Supervisor request accepted"))
 }
 
-func (h *goalsHandler) RejectSupervisorRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	goals := &entity.Goals{}
-	userGmail := r.Context().Value("email").(string)
-	fmt.Println("ini dia:", userGmail)
+// func (h *goalsHandler) RejectSupervisorRequest(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
+// 	goals := &entity.Goals{}
+// 	userGmail := r.Context().Value("email").(string)
+// 	fmt.Println("ini dia:", userGmail)
 
-	goals.PersonalGmail = userGmail
-	fmt.Println("ini:", goals.PersonalGmail)
+// 	goals.PersonalGmail = userGmail
+// 	fmt.Println("ini:", goals.PersonalGmail)
 
-	supervisorEmail := r.URL.Query().Get("supervisorEmail")
-	if supervisorEmail == "" {
-		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
-		return
-	}
+// 	supervisorEmail := r.URL.Query().Get("supervisorEmail")
+// 	if supervisorEmail == "" {
+// 		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
+// 		return
+// 	}
 
-	err := h.goalsUseCase.RejectSupervisorRequest(userGmail, supervisorEmail)
-	if err != nil {
-		http.Error(w, "Failed to reject supervisor request", http.StatusInternalServerError)
-		return
-	}
+// 	err := h.goalsUseCase.RejectSupervisorRequest(userGmail, supervisorEmail)
+// 	if err != nil {
+// 		http.Error(w, "Failed to reject supervisor request", http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Supervisor request rejected"))
-}
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte("Supervisor request rejected"))
+// }
 
 // request body create goal
 // {
