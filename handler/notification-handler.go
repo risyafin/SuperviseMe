@@ -24,8 +24,9 @@ func (e *notificationHandler) GetNotification(writer http.ResponseWriter, reques
 		_ = json.NewEncoder(writer).Encode(errResponse)
 		return
 	}
+	supervisor := userGmail
 
-	notification, err := e.notificationUseCase.GetNotification(userGmail)
+	notification, err := e.notificationUseCase.GetNotification(userGmail, supervisor)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		errResponse := entity.ResponsesError{Error: err.Error()}

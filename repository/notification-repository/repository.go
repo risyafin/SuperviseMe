@@ -28,12 +28,12 @@ func (r *repository) CreateNotification(notification *entity.Notification) error
 	return nil
 }
 
-func (r *repository) GetNotification(personal string) (*entity.Notification, error) {
+func (r *repository) GetNotification(personal string, supervisor string) (*entity.Notification, error) {
 	var (
 		notification *entity.Notification
 		db           = r.DB
 	)
 
-	err := db.Where("personal_email = ?", personal).First(&notification).Error
+	err := db.Where("personal_email = ? OR supervisor_email = ?", personal, supervisor).First(&notification).Error
 	return notification, err
 }

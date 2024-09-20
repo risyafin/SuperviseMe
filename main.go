@@ -9,6 +9,7 @@ import (
 	"superviseMe/domain"
 	"superviseMe/handler"
 	cardrepository "superviseMe/repository/card-repository"
+	commentrepository "superviseMe/repository/comment-repository"
 	goalsrepository "superviseMe/repository/goals-repository"
 	listrepository "superviseMe/repository/list-repository"
 	notificationrepository "superviseMe/repository/notification-repository"
@@ -61,6 +62,10 @@ func main() {
 	NotificationUsecase := module.NewNotificationUseCase(NotificationRepo)
 	NotificationHandler := handler.NewNotificationHandler(NotificationUsecase)
 
+	CommentRepo := commentrepository.NewCommentRepository(conn)
+	CommentUsecase := module.NewCommentUsecase(CommentRepo)
+	CommentHandler := handler.NewCommentHandler(CommentUsecase)
+
 	const port string = ":8080"
 	r := mux.NewRouter()
 
@@ -90,6 +95,8 @@ func main() {
 	r.HandleFunc("/card", jwtMiddleware(CardHandler.CreateCard)).Methods("POST")
 
 	r.HandleFunc("/notification", jwtMiddleware(NotificationHandler.GetNotification)).Methods("GET")
+
+	r.HandleFunc("/cards/{card_id}/comments", jwtMiddleware(CommentHandler.CreateComment)).Methods("POST")
 
 	fmt.Println("localhost:8080")
 	http.ListenAndServe(port, r)

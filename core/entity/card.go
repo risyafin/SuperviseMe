@@ -67,17 +67,3 @@ type CheckListCardResponse struct {
 	Name   string `json:"name"`
 	IsDone string `gorm:"type:enum('1', '0')" json:"isDone"`
 }
-
-type Comment struct {
-	gorm.Model
-	ID      int    `json:"id"`
-	CardID  int    `json:"cardId"`
-	UserID  int    `json:"userId"`
-	Message string `json:"message"`
-}
-type CommentRespons struct {
-	ID      int    `json:"id"`
-	CardID  int    `json:"cardId"`
-	UserID  int    `json:"userId"`
-	Message string `json:"message"`
-}

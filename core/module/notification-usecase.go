@@ -6,7 +6,7 @@ import (
 )
 
 type NotificationUsecase interface {
-	GetNotification(personal string) (*entity.Notification, error)
+	GetNotification(personal string, supervisor string) (*entity.Notification, error)
 }
 
 type notificationUsecase struct {
@@ -17,6 +17,6 @@ func NewNotificationUseCase(notificationrepository repository.NotificationReposi
 	return &notificationUsecase{notificationRepository: notificationrepository}
 }
 
-func (e *notificationUsecase) GetNotification(personal string) (*entity.Notification, error) {
-	return e.notificationRepository.GetNotification(personal)
+func (e *notificationUsecase) GetNotification(personal string, supervisor string) (*entity.Notification, error) {
+	return e.notificationRepository.GetNotification(personal, supervisor)
 }
