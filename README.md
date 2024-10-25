@@ -65,7 +65,7 @@ This is the instruction how you can test _SuperviseMe_ on your local computer:
  Project Usage
 > [!NOTE]
 > Some endpoint is need authorization to be accessed. You can get the token JWT by login, don't forget to register new account first if no user exist on database.
-## Admin Route
+## User Route
 ### POST
 - ```/register```, Register new User. Example body:
 ```json
