@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"superviseMe/core/entity"
 	"superviseMe/core/module"
+
+	"github.com/gorilla/mux"
 )
 
 type goalsHandler struct {
@@ -94,12 +97,15 @@ func (h *goalsHandler) AcceptSupervisorRequest(w http.ResponseWriter, r *http.Re
 	userGmail := r.Context().Value("email").(string)
 	fmt.Println("ini dia:", userGmail)
 
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+
 	goals.PersonalGmail = userGmail
 	fmt.Println("ini:", goals.PersonalGmail)
 
-	err := h.goalsUseCase.AcceptSupervisorRequest(userGmail)
+	err := h.goalsUseCase.AcceptSupervisorRequest(id)
 	if err != nil {
-		http.Error(w, "Failed to accept supervisor request", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -107,30 +113,26 @@ func (h *goalsHandler) AcceptSupervisorRequest(w http.ResponseWriter, r *http.Re
 	w.Write([]byte("Supervisor request accepted"))
 }
 
-// func (h *goalsHandler) RejectSupervisorRequest(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	goals := &entity.Goals{}
-// 	userGmail := r.Context().Value("email").(string)
-// 	fmt.Println("ini dia:", userGmail)
+func (h *goalsHandler) RejectSupervisor(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	goals := &entity.Goals{}
+	userGmail := r.Context().Value("email").(string)
+	fmt.Println("ini dia:", userGmail)
 
-// 	goals.PersonalGmail = userGmail
-// 	fmt.Println("ini:", goals.PersonalGmail)
+	goals.PersonalGmail = userGmail
+	fmt.Println("ini:", goals.PersonalGmail)
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
 
-// 	supervisorEmail := r.URL.Query().Get("supervisorEmail")
-// 	if supervisorEmail == "" {
-// 		http.Error(w, "Supervisor email is required", http.StatusBadRequest)
-// 		return
-// 	}
+	err := h.goalsUseCase.RejectSupervisor(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	err := h.goalsUseCase.RejectSupervisorRequest(userGmail, supervisorEmail)
-// 	if err != nil {
-// 		http.Error(w, "Failed to reject supervisor request", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write([]byte("Supervisor request rejected"))
-// }
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Supervisor request rejected"))
+}
 
 // request body create goal
 // {

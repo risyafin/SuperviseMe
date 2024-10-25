@@ -75,7 +75,7 @@ func main() {
 
 	r.HandleFunc("/auth/login", UserHandler.LoginGoogle)
 	r.HandleFunc("/auth/google-callback", UserHandler.CallbackGoogle)
-	r.HandleFunc("/registration", UserHandler.Registration).Methods("POST")
+	r.HandleFunc("/register", UserHandler.Registration).Methods("POST")
 	r.HandleFunc("/login", UserHandler.Login).Methods("POST")
 	r.HandleFunc("/profile", jwtMiddleware(UserHandler.GetUserByGmail)).Methods("GET")
 	r.HandleFunc("/update-name", jwtMiddleware(UserHandler.UpdateName)).Methods("PUT")
@@ -85,7 +85,8 @@ func main() {
 	r.HandleFunc("/personal", jwtMiddleware(UserHandler.GetGoalPersonal)).Methods("GET")
 
 	r.HandleFunc("/goals", jwtMiddleware(GoalsHandler.CreateGoals)).Methods("POST")
-	r.HandleFunc("/goals/accept-supervisor", jwtMiddleware(GoalsHandler.AcceptSupervisorRequest)).Methods("PUT")
+	r.HandleFunc("/goals/{id}/accept-supervisor", jwtMiddleware(GoalsHandler.AcceptSupervisorRequest)).Methods("PUT")
+	r.HandleFunc("/goals/{id}/reject-supervisor", jwtMiddleware(GoalsHandler.RejectSupervisor)).Methods("PUT")
 	// r.HandleFunc("/goals/reject-supervisor", jwtMiddleware(GoalsHandler.RejectSupervisorRequest)).Methods("POST")
 	// r.HandleFunc("/goals/{id}", GoalsHandler.GetGoalsByID).Methods("GET")
 
@@ -94,7 +95,7 @@ func main() {
 
 	r.HandleFunc("/card", jwtMiddleware(CardHandler.CreateCard)).Methods("POST")
 
-	r.HandleFunc("/notification", jwtMiddleware(NotificationHandler.GetNotification)).Methods("GET")
+	r.HandleFunc("/notification", jwtMiddleware(NotificationHandler.UpdateNotificationStatusAndFetch)).Methods("POST")
 
 	r.HandleFunc("/cards/{card_id}/comments", jwtMiddleware(CommentHandler.CreateComment)).Methods("POST")
 

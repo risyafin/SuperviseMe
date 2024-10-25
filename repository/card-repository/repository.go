@@ -53,3 +53,8 @@ func (r *repository) CreateCard(card *entity.Card) (*entity.Card, error) {
 
 	return card, nil
 }
+
+func (r *repository) UpdateCheckList(name string) error {
+	return r.DB.Model(&entity.CheckListCard{}).Where("name", name).Update("is_done", "1").Error
+}
+

@@ -18,7 +18,7 @@ func NewGoalsRepository(db *gorm.DB) goalsRepo.GoalsRepository {
 	}
 }
 
-func (r repository) AcceptedSupervisor(supervisor string, status string, accepted time.Time) error {
+func (r repository) AcceptedSupervisor(id int, status string, accepted time.Time) error {
 	updates := map[string]interface{}{
 		"status":      status,
 		"accepted_at": accepted,
@@ -26,7 +26,19 @@ func (r repository) AcceptedSupervisor(supervisor string, status string, accepte
 
 	// Update 2 field dari entitas Goals berdasarkan kondisi
 	return r.DB.Model(&entity.Goals{}).
-		Where("supervisor_gmail = ?", supervisor).
+		Where("id = ?", id).
+		Updates(updates).Error
+}
+
+func (r repository) RejectedSupervisor(id int, status string, reject time.Time) error {
+	updates := map[string]interface{}{
+		"status":      status,
+		"rejected_at": reject,
+	}
+
+	// Update 2 field dari entitas Goals berdasarkan kondisi
+	return r.DB.Model(&entity.Goals{}).
+		Where("id = ?", id).
 		Updates(updates).Error
 }
 
@@ -34,13 +46,13 @@ func (r *repository) UpdateName(name string, email string) error {
 	return r.DB.Model(&entity.User{}).Where("email = ?", email).Update("name", name).Error
 }
 
-func (r repository) GetGoalsByGmail(personalGmail string) (*entity.Goals, error) {
+func (r repository) GetGoalsById(id int) (*entity.Goals, error) {
 	var (
 		goals *entity.Goals
 		db    = r.DB
 	)
 
-	err := db.Where("personal_gmail = ?", personalGmail).First(&goals).Error
+	err := db.Where("id = ?", id).First(&goals).Error
 	return goals, err
 }
 

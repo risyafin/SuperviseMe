@@ -18,6 +18,10 @@ func NewNotificationRepository(db *gorm.DB) notifRepo.NotificationRepository {
 	}
 }
 
+func (r *repository) UpdateNotification(message, status, email string) error {
+	return r.DB.Model(&entity.Notification{}).Where("personal_email = ? OR supervisor_email = ?", email, email).Updates(entity.Notification{Message: message, Status: status}).Error
+}
+
 func (r *repository) CreateNotification(notification *entity.Notification) error {
 	err := r.DB.Create(&notification).Error
 	if err != nil {
@@ -27,13 +31,18 @@ func (r *repository) CreateNotification(notification *entity.Notification) error
 	}
 	return nil
 }
+func (r *repository) UpdateStatusAndFetchAll(email string) ([]entity.Notification, error) {
+	err := r.DB.Model(&entity.Notification{}).Where("personal_email = ? OR supervisor_email = ?", email, email).Update("status", "read").Error
+	if err != nil {
+		return nil, err
+	}
 
-func (r *repository) GetNotification(personal string, supervisor string) (*entity.Notification, error) {
-	var (
-		notification *entity.Notification
-		db           = r.DB
-	)
+	// Setelah update, ambil semua data user
+	var notification []entity.Notification
+	err = r.DB.Where("personal_email = ? OR supervisor_email = ?", email, email).Find(&notification).Error
+	if err != nil {
+		return nil, err
+	}
 
-	err := db.Where("personal_email = ? OR supervisor_email = ?", personal, supervisor).First(&notification).Error
-	return notification, err
+	return notification, nil
 }
